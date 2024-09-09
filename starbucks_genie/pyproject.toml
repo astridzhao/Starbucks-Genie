@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "starbucks_genie"
+version = "0.1.0"
+description = "Starbucks-Genie using crewAI"
+authors = ["Your Name <you@example.com>"]
+
+[tool.poetry.dependencies]
+python = ">=3.10,<=3.13"
+crewai = { extras = ["tools"], version = ">=0.55.2,<1.0.0" }
+
+
+[tool.poetry.scripts]
+starbucks_genie = "starbucks_genie.main:run"
+run_crew = "starbucks_genie.main:run"
+train = "starbucks_genie.main:train"
+replay = "starbucks_genie.main:replay"
+test = "starbucks_genie.main:test"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,12 @@
+innovateDrink:
+  description: >
+    Focus on creating a unique and flavorful beverage that aligns with user's requirement: {user-input} and user's preference: {user-preference}.
+  expected_output: >
+    The output should be in a list of ingredient for the drink using the output template.
+
+
+nutritionCalculate: 
+  description: >
+    Provide nutritional data charts for the drink based on the ingredients including calories, sugar, fat, protein, and any health benefits.
+  expected_output: >
+    The list of nutribution data. calorie in kcal, fat/protein/carb in gram.
