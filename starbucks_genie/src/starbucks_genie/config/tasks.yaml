@@ -1,12 +1,21 @@
 innovateDrink:
   description: >
     Focus on creating a unique and flavorful beverage that aligns with user's requirement: {user-input} and user's preference: {user-preference}.
+    Double check did not use any unporvided ingredients reading from the file.
   expected_output: >
-    The output should be in a list of ingredient for the drink using the output template (Json format).
-
+    The output should be in a list of ingredient for the drink using the output template.
 
 nutritionCalculate: 
   description: >
     Provide nutritional data charts for the drink based on the ingredients including calories, sugar, fat, protein, and any health benefits.
   expected_output: >
     The list of nutribution data. calorie in kcal, fat/protein/carb in gram.
+
+drinkSummarize: 
+  description: >
+    Summarize the newly created drink by listing its name, ingredients, nutritional data, and recommendation reason. 
+  expected_output: >
+    1. Name of the Drink
+    2. Ingredients
+    3. Nutritional Data: Key nutritional information.
+    4. Recommendation Rationale: A brief explanation in 20 words.

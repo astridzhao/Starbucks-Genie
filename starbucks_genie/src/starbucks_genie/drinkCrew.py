@@ -14,10 +14,14 @@ from crewai_tools import (
 from typing import List, Optional, Type
 from pydantic import BaseModel, Field, model_validator
 from pydantic_core import PydanticCustomError
+
 #=================
 # LLM object and API Key
 #=================
 os.environ["COHERE_API_KEY"] = config.cohere_key
+# os.environ["OPENAI_MODEL_NAME"]="gpt-4o-mini"
+# os.environ["OPENAI_API_KEY"] = config.openai_key
+
 llm = ChatCohere()
 
 #=================
@@ -59,6 +63,11 @@ class DrinkIngredients(BaseModel):
 class NutritiousInfo(BaseModel):
     nutrition: List[str]  = Field(..., description="List of Calorie, Fat, Protein, Carb, Sugar in the drink")
 
+class DrinkInfo(BaseModel):
+    name: str = Field(..., description="Name of the drink")
+    ingredient: List[str]  = Field(..., description="List of ingredients")
+    nutrition: List[str]  = Field(..., description="List of nutrition data")
+    recommendation: str = Field(..., description="reason why innovate the drink")
 #=================
 # Crew Agents
 #=================
@@ -85,7 +94,6 @@ class DrinkInnovationCrew:
             config=self.tasks_config['innovateDrink'],
             agent=self.innovator(),
             output_json=DrinkIngredients,
-            
     )
         
     @agent
@@ -103,7 +111,23 @@ class DrinkInnovationCrew:
             config=self.tasks_config['nutritionCalculate'],
             agent=self.nutritionist(),
             output_json=NutritiousInfo,
-            
+    )
+        
+    @agent
+    def summarizer(self) -> Agent:
+        return Agent(
+            config=self.agents_config['summarizer'],
+            allow_delegation=False,
+            verbose=True,
+            llm=llm
+    )
+        
+    @task
+    def summarizion_drink(self) -> Task: 
+        return Task(
+            config=self.tasks_config['drinkSummarize'],
+            agent=self.summarizer(),
+            output_json=DrinkInfo
     )
         
     @model_validator(mode="after")
@@ -125,9 +149,8 @@ class DrinkInnovationCrew:
         return Crew(
             agents=self.agents,  
             tasks=self.tasks, 
-            # process=Process.sequential,
+            process=Process.sequential,
             memory=False,
-            planning=True,
             verbose=True,
         )
 

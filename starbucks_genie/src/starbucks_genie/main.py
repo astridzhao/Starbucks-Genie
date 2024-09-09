@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import sys
 from starbucks_genie.drinkCrew import DrinkInnovationCrew
-
+import json
 # This main file is intended to be a way for your to run your
 # crew locally, so refrain from adding necessary logic into this file.
 # Replace with inputs you want to test with, it will automatically
@@ -19,8 +19,25 @@ def run():
     
     print("######################")
     print(result)
+    
+    print("######################")
+    data = json.loads(result)
+    # Accessing data
+    name = data['name']
+    ingredients = data['ingredient']
+    nutrition = data['nutrition']
+    recommendation = data['recommendation']
 
-
+    # Example of outputting the information
+    print(f"Drink Name: {name}")
+    print("Ingredients:")
+    for ingredient in ingredients:
+        print(f" - {ingredient}")
+    print("Nutritional Information:")
+    for info in nutrition:
+        print(f" - {info}")
+    print(f"Recommendation: {recommendation}")
+    
 # def train():
 #     """
 #     Train the crew for a given number of iterations.
