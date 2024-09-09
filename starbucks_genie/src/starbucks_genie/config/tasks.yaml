@@ -2,7 +2,7 @@ innovateDrink:
   description: >
     Focus on creating a unique and flavorful beverage that aligns with user's requirement: {user-input} and user's preference: {user-preference}.
   expected_output: >
-    The output should be in a list of ingredient for the drink using the output template.
+    The output should be in a list of ingredient for the drink using the output template (Json format).
 
 
 nutritionCalculate: 

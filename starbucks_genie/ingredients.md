@@ -1,3 +1,4 @@
+# Ingredient
 - **type_of_beverage**: required
   - Hot
   - Iced
@@ -123,4 +124,3 @@
 
 - **unique_selling_point**: required
   - What makes this drink unique
-

@@ -26,7 +26,7 @@ llm = ChatCohere()
 web_search_tool = WebsiteSearchTool()
 seper_dev_tool = SerperDevTool()
 ingredients_read_tool = FileReadTool(
-    file_path='/src/starbucks_genie/ingredient.md',
+    file_path='ingredients.md',
     description='A tool to read the ingredient from starbucks.'
 )
 
@@ -35,26 +35,26 @@ ingredients_read_tool = FileReadTool(
 #=================
 class DrinkIngredients(BaseModel):
     drink_name: List[str]  = Field(..., description="Name of the new drink")
-    # type_of_beverage: str = Field(..., description="Choose one of three preparation methods: 'Hot', 'Iced', 'Blended'")
-    # base: str = Field(..., description="Choose one base from: 'coffee', 'green tea', 'black tea', 'espresso'")
-    # tea:  str  = Field(..., description="choose one from: 'no added', 'add chai'")
+    type_of_beverage: str = Field(..., description="Choose one of three preparation methods: 'Hot', 'Iced', 'Blended'")
+    base: str = Field(..., description="Choose one base from: 'coffee', 'green tea', 'black tea', 'espresso'")
+    tea:  str  = Field(..., description="choose one from: 'no added', 'add chai'")
     powder: List[str]  = Field(..., description="powders from 'chocolate malt powder', 'vanilla bean powder'"),
     sauces: List[str]  = Field(..., description="list of sauces 'dark caramel', 'mocha sauce', 'pumpkin sauce', 'white chocolate mocha sauce'"),
     syrup: List[str] = Field(..., description="List of syrups from: 'apple brown syrup', 'Brown Sugar Syrup', 'Caramel Syrup', 'Cinnamon Dolce Syrup', 'Hazelnut Syrup', 'Peppermint Syrup', 'Sugar-Free Vanilla Syrup', 'Toffeenut Syrup', 'Vanilla Syrup'")
-    # liquid_sweeteners: str = Field(..., description="Choose one from 'classic syrup', 'honey blend'")
+    liquid_sweeteners: str = Field(..., description="Choose one from 'classic syrup', 'honey blend'")
     sweetener_packets: List[str] = Field(..., description="Choose one or more from 'honey', 'splenda', 'stevia', 'sugar', 'sugar in the raw'")
     cold_foam: List[str] = Field(..., description="Choose from 'Apple Crisp Cream Cold Foam', 'Chocolate Cream Cold Foam', 'Matcha Cream Cold Foam', 'Oleato Golden Foam', 'Salted Caramel Cream Cold Foam', 'Strawberry Cream Cold Foam', 'Vanilla Sweet Cream Cold Foam'")
     nondairy_cold_foam: List[str] = Field(..., description="Choose from 'Nondairy Apple Crisp Cream Cold Foam', 'Nondairy Chocolate Cream Cold Foam', 'Nondairy Matcha Cream Cold Foam', 'Nondairy Oleato Golden Foam', 'Nondairy Salted Caramel Cream Cold Foam', 'Nondairy Strawberry Cream Cold Foam', 'Nondairy Vanilla Sweet Cream Cold Foam'")
-    # cinnamon_powder: str = Field(..., description="Choose one from 'no cinnamon powder', 'light cinnamon powder', 'cinnamon powder', 'extra cinnamon powder'")
+    cinnamon_powder: str = Field(..., description="Choose one from 'no cinnamon powder', 'light cinnamon powder', 'cinnamon powder', 'extra cinnamon powder'")
     drizzle: List[str] = Field(..., description="Choose from 'caramel drizzle', 'mocha drizzle', 'spiced apple drizzle'")
     topping: List[str] = Field(..., description="Choose from 'caramel crunch', 'cinnamon crumble', 'cinnamon dolce', 'cookie crumble', 'pumpkin spice'")
-    # whipped_cream: str = Field(..., description="Choose one from 'no whipped cream', 'light whipped cream', 'regular whipped cream', 'extra whipped cream'")
-    # add_line_the_cup: str = Field(..., description="Choose from 'line the cup with caramel sauce', 'line the cup with mocha sauce', '...'")
-    # add_in_water: str = Field(..., description="Choose one from 'no water', 'light water', 'water', 'extra water'")
-    # add_in_room: str = Field(..., description="Choose one from 'no room', 'light room', 'room', 'extra room'")
-    # creamer_options: str = Field(..., description="Choose from 'Splash of 2% Milk', 'Splash of Almondmilk', 'Splash of Coconutmilk', 'Splash of Cream (Half & Half)', 'Splash of Heavy Cream', 'Splash of Nondairy Vanilla Sweet Cream', 'Splash of Nonfat Milk', 'Splash of Oatmilk', 'Splash of Soymilk', 'Splash of Vanilla Sweet Cream', 'Splash of Whole Milk'")
-    # size_options: str = Field(..., description="Choose one from 'Tall', 'Grande', 'Venti'")
-    # unique_selling_point: str = Field(..., description="Describe what makes this drink unique")
+    whipped_cream: str = Field(..., description="Choose one from 'no whipped cream', 'light whipped cream', 'regular whipped cream', 'extra whipped cream'")
+    add_line_the_cup: str = Field(..., description="Choose from 'line the cup with caramel sauce', 'line the cup with mocha sauce', '...'")
+    add_in_water: str = Field(..., description="Choose one from 'no water', 'light water', 'water', 'extra water'")
+    add_in_room: str = Field(..., description="Choose one from 'no room', 'light room', 'room', 'extra room'")
+    creamer_options: str = Field(..., description="Choose from 'Splash of 2% Milk', 'Splash of Almondmilk', 'Splash of Coconutmilk', 'Splash of Cream (Half & Half)', 'Splash of Heavy Cream', 'Splash of Nondairy Vanilla Sweet Cream', 'Splash of Nonfat Milk', 'Splash of Oatmilk', 'Splash of Soymilk', 'Splash of Vanilla Sweet Cream', 'Splash of Whole Milk'")
+    size_options: str = Field(..., description="Choose one from 'Tall', 'Grande', 'Venti'")
+    unique_selling_point: str = Field(..., description="Describe what makes this drink unique")
 
 class NutritiousInfo(BaseModel):
     nutrition: List[str]  = Field(..., description="List of Calorie, Fat, Protein, Carb, Sugar in the drink")
@@ -84,7 +84,8 @@ class DrinkInnovationCrew:
         return Task(
             config=self.tasks_config['innovateDrink'],
             agent=self.innovator(),
-            output_json=DrinkIngredients
+            output_json=DrinkIngredients,
+            
     )
         
     @agent
@@ -102,6 +103,7 @@ class DrinkInnovationCrew:
             config=self.tasks_config['nutritionCalculate'],
             agent=self.nutritionist(),
             output_json=NutritiousInfo,
+            
     )
         
     @model_validator(mode="after")
@@ -123,7 +125,9 @@ class DrinkInnovationCrew:
         return Crew(
             agents=self.agents,  
             tasks=self.tasks, 
-            process=Process.sequential,
+            # process=Process.sequential,
+            memory=False,
+            planning=True,
             verbose=True,
         )
 

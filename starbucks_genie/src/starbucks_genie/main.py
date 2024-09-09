@@ -12,10 +12,13 @@ def run():
     Run the drink Crew
     """
     inputs = {
-        'user-preference':"low calorie",
-        'user-input':"summer refreshing"
+        'user-preference':"vegan",
+        'user-input':"autumn, fruit"
     }
-    DrinkInnovationCrew().crew().kickoff(inputs=inputs)
+    result = DrinkInnovationCrew().crew().kickoff(inputs=inputs)
+    
+    print("######################")
+    print(result)
 
 
 # def train():
