@@ -5,8 +5,10 @@ const Card = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin: 10px;
+  margin: 20px;
+  padding: 20px;
   cursor: pointer;
+  text-align: center;
 `;
 
 const Image = styled.img`
@@ -19,10 +21,10 @@ const Image = styled.img`
 `;
 
 const Label = styled.span`
-  margin-top: 10px;
+  margin-top: 20px;
   color: #333;
   font-size: 1rem; // Default size
-
+  font-family: 'Menlo';
   @media (max-width: 768px) {
     font-size: 0.9rem; // Smaller text on tablets and below
   }

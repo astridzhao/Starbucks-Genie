@@ -1,58 +1,76 @@
 import styled from 'styled-components';
 import React, { useState } from 'react';
-import DrinkBar from './DrinkBar';
+import DrinkMenu from './DrinkMenu';
 
 const MenuContainer = styled.div`
-    diaplay: flex;
-    margin-top: 20px;
-    flex-direction: column; // Align children vertically
+    display: flex;
+    flex-direction: column; 
     background-color: white;
-    width: 100%; // Full width container
+    width: 100%; 
 `
-
 const TabMenu = styled.div`
-  display: flex;
-  justify-content: space-around;
-  background-color: #F2F2F2;
-  border-bottom: 3px solid rgba(70, 68, 77, 0.5);
-  box-shadow: 0 4px 5px rgba(0, 0, 0, 0.1); 
+    display: flex;
+    justify-content: space-around;
+    background-color: #F2F2F2;
+    border-bottom: 2px solid rgba(70, 68, 77, 0.2);
+    box-shadow: 0 4px 5px rgba(0, 0, 0, 0.1); 
+    padding: 10px 0;
+    width: 100%; 
+    height: 50px; 
+    align-items: center;
+`;
+
+const ContentContainer = styled.div`
+  width: 100%; // Ensures the content spans 100% width
+  margin: 10px 30px 10px 30px; 
 `;
 
 const Tab = styled.button`
   flex-grow: 1;
   padding: 10px 0;
-  background: none;
+  background-color: ${(props) => (props.active ? '#004225' : '#f4f4f4')}; 
   border: none;
   font-weight: semi-bold;
   color: #333;
   font-size: 16px;
+  font-family: 'Pike';
+  font-weight: 800; 
   position: relative; 
+  font-weight: 700;
 
   &.active {
     color: #46444D;
-    border-bottom-color: #46444D;
+    font-weight: bold; 
     &:after {
-      content: ''; // Necessary to display the pseudo-element
+      content: ''; 
       position: absolute;
       bottom: 0;
       left: 50%; // Center the line under the tab
       transform: translateX(-50%); // Ensure it's centered regardless of the width
-      width: 20%; // Length of the border-bottom (adjust as needed)
+      width: 15%; // Length of the border-bottom (adjust as needed)
       height: 4px; // Thickness of the border-bottom
       background-color: #46444D; // Color of the active border
       border-radius: 10px;
     }
   }
 
+  &:hover {
+    background-color: ${(props) => (props.active ? '#004f2d' : '#e8e8e8')};  // Softer color shift on hover
+    color: ${(props) => (props.active ? 'white' : '#333')};  // Keep text color consistent
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);  // Add a subtle shadow on hover for depth
+    transform: translateY(-2px);  // Slight lift effect on hover
+    transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+  }
+
   &:focus {
     outline: none;
   }
 
-  @media (max-width: 1024px) { // iPads and lower
+  @media (max-width: 1920px) { // laptop and lower
     justify-content: space-around;
   }
 
-  @media (max-width: 768px) { // Tablets and lower
+  @media (max-width: 1024px) { // ipads and lower
     justify-content: space-between;
   }
 
@@ -65,44 +83,42 @@ const Tab = styled.button`
 `;
 
 function Menu() {
-    const [activeIndex, setActiveIndex] = useState(0);
-    const items = [
-        { label: 'Menu' },
-        { label: 'Trending' },
-        { label: 'Customize' },
-    ];
+  const [activeIndex, setActiveIndex] = useState(0);
+  const items = [
+    { label: 'MENU' },
+    { label: 'TRENDING' },
+    { label: 'CUSTOMIZE' },
+  ];
 
-    const getContent = () => {
-        switch (activeIndex) {
-            case 0:
-                return <DrinkBar />;
-            case 1:
-                return <p>Content for Trending</p>;
-            case 2:
-                return <p>Content for Customize</p>;
-            default:
-                return <p>Welcome to our app!</p>;
-        }
-    };
+  const getContent = () => {
+    switch (activeIndex) {
+      case 0:
+        return <DrinkMenu />;
+      case 1:
+        return <p>Content for Trending</p>;
+      case 2:
+        return <p>Content for Customize</p>;
+      default:
+        return <p>Welcome to our app!</p>;
+    }
+  };
 
-    return (
-        <MenuContainer>
-            <div className="card">
-                <TabMenu>
-                    {items.map((item, index) => (
-                        <Tab key={index}
-                            className={activeIndex === index ? 'active' : ''}
-                            onClick={() => setActiveIndex(index)}>
-                            {item.label}
-                        </Tab>
-                    ))}
-                </TabMenu>
-                <div>
-                    {getContent()}
-                </div>
-            </div>
-        </MenuContainer>
-    );
+  return (
+    <MenuContainer>
+      <TabMenu className="menu">
+        {items.map((item, index) => (
+          <Tab key={index}
+            className={activeIndex === index ? 'active' : ''}
+            onClick={() => setActiveIndex(index)}>
+            {item.label}
+          </Tab>
+        ))}
+      </TabMenu>
+      <ContentContainer>
+        {getContent()}
+      </ContentContainer>
+    </MenuContainer>
+  );
 }
 
 export default Menu;

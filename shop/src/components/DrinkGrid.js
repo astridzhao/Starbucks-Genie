@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import DrinkCard from './DrinkCard';
 import styled from 'styled-components';
+import supabase from '../db/supabase-client';
 import { useNavigate } from 'react-router-dom';
 
 const GridContainer = styled.div`
@@ -10,62 +11,70 @@ const GridContainer = styled.div`
   gap: 20px;
   padding: 20px;
 
-  @media (max-width: 1024px) { // iPads and lower
-    justify-content: space-around;
+  @media (max-width: 1920px) { // laptop and lower
+    justify-content: space-between;
   }
 
-  @media (max-width: 768px) { // Tablets and lower
+  @media (max-width: 1024px) { // ipads and lower
     justify-content: space-between;
   }
 
   @media (max-width: 480px) { // Mobile phones
     flex-direction: column;
     align-items: center;
+    padding: 8px 16px;
+    font-size: 0.9rem; // Smaller text on smaller screens
   }
 `;
 
 const DrinksGrid = () => {
-    const [drinks, setDrinks] = useState([]);
-    const navigate = useNavigate();
+  const [drinks, setDrinks] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchDrinks = async () => {
-          const { data, error } = await supabase
-            .from('drinks')
-            .select('image, name');
-    
-          if (error) console.log('Error fetching drinks:', error);
-          else setDrinks(data);
-        };
-    
-        fetchDrinks();
-      }, []);
-      
-      const handleCardClick = (name) => {
-        navigate(`/drink/${name}`); // Assumes a route is set up for each drink
-      };
+  const navigate = useNavigate(); // Initialize the navigate function
 
-      return (
-        <GridContainer>
-          {drinks.map((drink, index) => (
+  const handleCardClick = (drinkId) => {
+    console.log("Card clicked with drinkId: ", drinkId);
+    navigate(`/drink/${drinkId}`); // Use drink ID to navigate
+  };
+
+  const table = 'menuitems';
+
+  useEffect(() => {
+    async function fetchDrinks() {
+      try {
+        let { data } = await supabase
+          .from(table)
+          .select('itemid, name, image'); // Select only needed fields
+        setDrinks(data);
+
+        console.log("Drinks id, name, image", data);
+      } catch (error) {
+        console.error('Error fetching drinks:', error.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchDrinks();
+  }, []);
+
+  if (loading) return <p>Loading...</p>;
+
+  return (
+    <div className="drink-grid">
+      <GridContainer>
+        {drinks.map((drink) => {
+          return (
             <DrinkCard
-              key={index}
+              key={drink.itemid}
               image={drink.image}
               name={drink.name}
-              onClick={() => handleCardClick(drink.name)}
-            />
-          ))}
-        </GridContainer>
-      );
-    };
-    
-    export default DrinksGrid;
-    
-    
-    
-    
-    
-    
-    
-    
-    
+              onClick={() => handleCardClick(drink.itemid)}
+            />);
+        })}
+      </GridContainer>
+    </div>
+  );
+};
+
+export default DrinksGrid;

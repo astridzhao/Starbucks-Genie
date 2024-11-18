@@ -68,10 +68,10 @@ class DrinkInfo(BaseModel):
     ingredient: List[str]  = Field(..., description="List of ingredients")
     nutrition: List[str]  = Field(..., description="List of nutrition data")
     recommendation: str = Field(..., description="reason why innovate the drink")
+    
 #=================
 # Crew Agents
 #=================
-
 @CrewBase
 class DrinkInnovationCrew:
     """StarbucksGenie drink innovation crew"""

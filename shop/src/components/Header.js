@@ -3,10 +3,10 @@ import styled from 'styled-components';
 
 const HeaderContainer = styled.header`
   background-color: #1e3932;
+  min-height: 10%;
   color: white;
   display: flex;
   padding: 10px 20px;
-  text-align: center;
   img {
     height: 50px;  // Adjust according to your actual logo size
   }
@@ -15,7 +15,7 @@ const HeaderContainer = styled.header`
 function Header() {
   return (
     <HeaderContainer>
-      <img src="logo.png" alt="Starbucks" />
+      <img src="logo.png" alt="Starbucks" height={150} />
     </HeaderContainer>
   );
 }

@@ -2,39 +2,27 @@ import React from 'react';
 import styled from 'styled-components';
 import Header from './components/Header';
 import Menu from './components/Menu';
-
-import { createGlobalStyle } from 'styled-components';
-
-// Define global styles
-const GlobalStyle = createGlobalStyle`
-  body {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-    box-sizing: border-box;
-  }
-
-  *, *:before, *:after {
-    box-sizing: inherit;
-  }
-`;
+import DrinkDetail from './components/drink/DrinkDetail'; // Ensure you have this component
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 // Styled container for the app
 const AppContainer = styled.div`
   font-family: Arial, sans-serif;
-  max-width: 1200px;
+  width: 100%;
   margin: auto;
 `;
 
 function App() {
   return (
-    <>
-      <GlobalStyle /> 
-      <AppContainer>
-        <Header />
-        <Menu />
-      </AppContainer>
-    </>
+    <AppContainer>
+      <Header />
+      <Router>
+        <Routes>
+          <Route path="/" element={<Menu />} />
+          <Route path="/drink/:drinkId" element={<DrinkDetail />} />
+        </Routes>
+      </Router>
+    </AppContainer>
   );
 }
 
