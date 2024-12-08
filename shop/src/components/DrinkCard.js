@@ -34,10 +34,10 @@ const Label = styled.span`
   }
 `;
 
-const DrinkCard = ({ image, name, onClick }) => (
+const DrinkCard = ({ drink, onClick }) => (
   <Card onClick={onClick}>
-    <Image src={image} alt={name} />
-    <Label>{name}</Label>
+    <Image src={drink.image} alt={drink.name} />
+    <Label>{drink.name}</Label>
   </Card>
 );
 

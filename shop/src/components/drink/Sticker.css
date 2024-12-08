@@ -1,0 +1,21 @@
+.sticker {
+    width: 300px;
+    padding: 20px;
+    background-color: white;
+    border: 1px solid black;
+    font-family: Arial, sans-serif;
+}
+
+h2 {
+    margin: 10px 0;
+    font-size: 18px;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+li {
+    font-size: 14px;
+}

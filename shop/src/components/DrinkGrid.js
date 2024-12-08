@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import DrinkCard from './DrinkCard';
 import styled from 'styled-components';
 import supabase from '../db/supabase-client';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import Menu from './Menu';
+
 
 const GridContainer = styled.div`
   display: flex;
@@ -30,12 +32,17 @@ const GridContainer = styled.div`
 const DrinksGrid = () => {
   const [drinks, setDrinks] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const location = useLocation();
   const navigate = useNavigate(); // Initialize the navigate function
+  const pathParts = location.pathname.split('/');
+  const drinkCategory = pathParts[2];
+  console.log("Current drink category: ", drinkCategory)
 
-  const handleCardClick = (drinkId) => {
-    console.log("Card clicked with drinkId: ", drinkId);
-    navigate(`/drink/${drinkId}`); // Use drink ID to navigate
+  const handleCardClick = (drink) => {
+    console.log("Card clicked with drinkId: ", drink.itemid);
+    navigate(`/menu/${drink.category}/${drink.itemid}`, {
+      state: { drinkData: drink }
+    });
   };
 
   const table = 'menuitems';
@@ -45,10 +52,14 @@ const DrinksGrid = () => {
       try {
         let { data } = await supabase
           .from(table)
-          .select('itemid, name, image'); // Select only needed fields
-        setDrinks(data);
-
-        console.log("Drinks id, name, image", data);
+          .select('*')
+          .eq('category', drinkCategory);// Select only needed fields
+        if (data) {
+          console.log("Fetched drinks:", data);
+          setDrinks(data);
+        } else {
+          console.log("No drinks found for category:", drinkCategory);
+        }
       } catch (error) {
         console.error('Error fetching drinks:', error.message);
       } finally {
@@ -56,7 +67,7 @@ const DrinksGrid = () => {
       }
     }
     fetchDrinks();
-  }, []);
+  }, [drinkCategory]);
 
   if (loading) return <p>Loading...</p>;
 
@@ -67,9 +78,8 @@ const DrinksGrid = () => {
           return (
             <DrinkCard
               key={drink.itemid}
-              image={drink.image}
-              name={drink.name}
-              onClick={() => handleCardClick(drink.itemid)}
+              drink={drink}
+              onClick={() => handleCardClick(drink)}
             />);
         })}
       </GridContainer>

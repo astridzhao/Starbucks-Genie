@@ -1,131 +1,85 @@
-import { useState } from 'react'
-import { ChevronLeft, ChevronDown, Plus, Minus, Check } from 'lucide-react'
-import { categories, milks, syrups } from './Drink-dbConstant'
+import styled from 'styled-components';
+import React, { useState, useEffect } from 'react';
+import { useParams, useLocation, Link } from 'react-router-dom';
 import supabase from '../../db/supabase-client';
-import { Field, Label, Radio, RadioGroup } from '@headlessui/react'
+import DrinkHeroSection from '../ui/DrinkDetail-HeroSection'
+import DrinkSection from './DrinkSection'
 
-// ListItem component to handle Milk and Syrup items dynamically
-const ListItem = ({ item, selected, setSelected, type }) => (
-    <div
-        className="bg-gray-100 rounded-lg p-4 flex items-center justify-between cursor-pointer"
-        onClick={() => setSelected(item.id)}
-    >
-        <span>{item.name}</span>
-        {type === 'milk' && selected === item.id && <Check className="h-6 w-6 text-[#00754a]" />}
-        {type === 'syrup' && (
-            <div className="flex items-center">
-                <button
-                    onClick={() => setSelected(Math.max(0, selected - 1))}
-                    className="bg-white rounded-full p-1 shadow"
-                >
-                    <Minus className="h-6 w-6 text-[#00754a]" />
-                </button>
-                <span className="mx-4 font-semibold">{selected}</span>
-                <button
-                    onClick={() => setSelected(selected + 1)}
-                    className="bg-white rounded-full p-1 shadow"
-                >
-                    <Plus className="h-6 w-6 text-[#00754a]" />
-                </button>
-            </div>
-        )}
-    </div>
-)
-export default function Component() {
-    
+export default function DrinkDetail() {
+    const { category, drinkId } = useParams(); // Get drinkId from URL
+    const location = useLocation(); // Hook from react-router-dom
+    const drinkData = location.state?.drinkData;
+    console.log('Received drink data:', drinkData);
+    const [loading, setLoading] = useState(true);
+    const [drink, setDrink] = useState(drinkData || null);
 
-    const [expandedCategory, setExpandedCategory] = useState(null)
-    const [syrupPumps, setSyrupPumps] = useState({})
-    const [selectedMilk, setSelectedMilk] = useState(null)
+    const categoryMap = {
+        "coldcoffee": "Cold Coffee",
+        "hotcoffee": "Hot Coffee",
+        "icetea": "Iced Tea",
+        "refresher": "Refresher"
+    };
 
-    const toggleCategory = (categoryId) => {
-        setExpandedCategory(expandedCategory === categoryId ? null : categoryId)
+    useEffect(() => {
+        if (drinkData) {
+            console.log('Fetched drinkData:', drinkData);
+            setLoading(false);
+            return;
+        }
+        if (!drinkData) {
+            async function fetchDrinkDetails() {
+                try {
+                    const { data, error } = await supabase
+                        .from('menuitems')
+                        .select('*')  // Select all fields you need
+                        .eq('itemid', drinkId)
+                        .single();
+                    if (error) throw error;
+                    const parsedDescriptions = typeof data.descriptions === 'string'
+                        ? JSON.parse(data.descriptions)
+                        : data.descriptions;
+                    setDrink({ ...data, descriptions: parsedDescriptions });
+                    // console.log("Combined drink details:", data);
+                }
+                catch (error) {
+                    console.error('Error fetching drink details:', error.message);
+                } finally {
+                    setLoading(false);
+                }
+            }
+            fetchDrinkDetails();
+        }
+    }, [drinkId, drinkData]);
+
+    // console.log('Current state:', { drinkData });
+
+    if (loading) {
+        return <div>Loading...</div>;
     }
-
-    const adjustSyrupPumps = (syrupId, change) => {
-        setSyrupPumps(prev => ({
-            ...prev,
-            [syrupId]: Math.max(0, (prev[syrupId] || 0) + change)
-        }))
+    if (!drink) {
+        return <div>Drink not found</div>;
     }
 
     return (
-        <div className="max-w-2xl mx-auto p-4 font-sans">
-            <header className="bg-[#1e3932] text-white p-6 rounded-t-lg">
-                <nav className="flex items-center text-sm mb-4">
-                    <a href="#" className="hover:underline">Menu</a>
-                    <ChevronLeft className="mx-2 h-4 w-4" />
-                    <a href="#" className="hover:underline">Cold Coffees</a>
-                    <ChevronLeft className="mx-2 h-4 w-4" />
-                    <span>Butterbeer Frappuccino</span>
-                </nav>
-                <div className="flex items-center">
-                    <img
-                        src="https://image-link"
-                        alt="Butterbeer Frappuccino"
-                        className="w-32 h-32 object-cover rounded-full mr-6"
-                    />
-                    <div>
-                        <h1 className="text-3xl font-bold mb-2">Butterbeer Frappuccino</h1>
-                        <p className="text-lg">Grande 16 fl oz</p>
-                    </div>
+        <div>
+            <nav style={{ padding: '2rem', fontSize: '1.125rem', fontWeight: '600', color: '#4B5563' }}>
+                <div className="flex items-center gap-2">
+                    <Link to={`/menu/${category}`} style={{ fontWeight: '200', color: '#4B5563', textDecoration: 'none' }} onMouseOver={(e) => e.currentTarget.style.color = '#00040a'} onMouseOut={(e) => e.currentTarget.style.color = '#4B5563'}>{categoryMap[drink.category]}</Link>
+                    <span className="text-gray-600">/</span>
+                    <span className="text-gray-800">{drink.name}</span>
                 </div>
-            </header>
+            </nav>
 
-            <main className="bg-white rounded-b-lg shadow-lg p-6">
+            <DrinkHeroSection
+                drinkName={drink.name}
+                image={drink.image}
+                description={drink.general_description}
+            />
 
-                {categories.map((category) => (
-                    <section key={category.id} className="mb-8">
-                        <h2 className="text-xl font-bold mb-4">{category.name}</h2>
-                        {category.id === 2 && (
-                            <div className="space-y-4 mb-4">
-                                {syrups.map(syrup => (
-                                    <ListItem
-                                        key={syrup.id}
-                                        item={syrup}
-                                        selected={syrupPumps[syrup.id] || 0}
-                                        setSelected={change => adjustSyrupPumps(syrup.id, change)}
-                                        type="syrup"
-                                    />
-                                ))}
-                            </div>
-                        )}
-                        {category.id === 1 && (
-                            <div className="space-y-2 mb-4">
-                                {milks.map(milk => (
-                                    <ListItem
-                                        key={milk.id}
-                                        item={milk}
-                                        selected={selectedMilk}
-                                        setSelected={setSelectedMilk}
-                                        type="milk"
-                                    />
-                                ))}
-                            </div>
-                        )}
-                        <div
-                            className="bg-gray-100 rounded-lg p-4 flex justify-between items-center cursor-pointer"
-                            onClick={() => toggleCategory(category.id)}
-                        >
-                            <span>{`Add ${category.name}`}</span>
-                            <ChevronDown className={`h-6 w-6 text-[#00754a] transform transition-transform ${expandedCategory === category.id ? 'rotate-180' : ''}`} />
-                        </div>
-                        {expandedCategory === category.id && (
-                            <div className="mt-2 space-y-2">
-                                {/* Render options dynamically */}
-                                <div className="bg-white rounded-lg p-3 flex justify-between items-center shadow">
-                                    <span>Option 1</span>
-                                    <Check className="h-5 w-5 text-[#00754a]" />
-                                </div>
-                                <div className="bg-white rounded-lg p-3 flex justify-between items-center shadow">
-                                    <span>Option 2</span>
-                                    <Check className="h-5 w-5 text-[#00754a] opacity-0" />
-                                </div>
-                            </div>
-                        )}
-                    </section>
-                ))}
-            </main>
+            <div className="p-4">
+                <DrinkSection drink={drink.descriptions} />
+            </div>
         </div>
+
     )
 }

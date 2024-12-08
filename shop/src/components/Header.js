@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-
+import logo from '../public/logo.png';
 const HeaderContainer = styled.header`
   background-color: #1e3932;
   min-height: 10%;
@@ -15,7 +15,7 @@ const HeaderContainer = styled.header`
 function Header() {
   return (
     <HeaderContainer>
-      <img src="logo.png" alt="Starbucks" height={150} />
+      <img src={logo} alt="Starbucks" height={150} />
     </HeaderContainer>
   );
 }

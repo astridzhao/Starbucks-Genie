@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import DrinkGrid from './DrinkGrid';
+import TabMenu from './TabMenu';
+import { useNavigate, useLocation } from 'react-router-dom';// Import useNavigate
+import { Tab } from '@headlessui/react';
 
 const ButtonBar = styled.div`
   display: flex;
@@ -52,34 +55,47 @@ const Button = styled.button`
 
 function DrinkMenu() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Separate array for drink categories
   const items = [
-    { label: 'Cold Coffee' },
-    { label: 'Hot Coffee' },
-    { label: 'Ice Tea' },
-    { label: 'Refresher' },
+    { label: 'Cold Coffee', path: 'coldcoffee' },
+    { label: 'Hot Coffee', path: 'hotcoffee' },
+    { label: 'Iced Tea', path: 'icetea' },
+    { label: 'Refresher', path: 'refresher' },
   ];
 
+  const handleButtonClick = (index) => {
+    setActiveIndex(index);
+    navigate(`/menu/${items[index].path}`); // Add navigation when button is clicked
+  };
+
   const getContent = () => {
-    switch (activeIndex) {
-      case 0:
+    const pathParts = location.pathname.split('/');
+    const category = pathParts[2];
+    switch (category) {
+      case 'coldcoffee':
         return <DrinkGrid />;
-      case 1:
-        return <p>Content for Trending</p>;
-      case 2:
-        return <p>Content for Customize</p>;
-      default:
-        return <p>Welcome to our app!</p>;
+      case 'hotcoffee':
+        return <DrinkGrid />
+      case 'icetea':
+        return <DrinkGrid />;
+      case 'refresher':
+        return <DrinkGrid />;
     }
   };
 
   return (
     <div className="drink-bar">
-      <ButtonBar>
+      <TabMenu />
+      <ButtonBar style={{padding:"30px"}}>
         {items.map((item, index) => (
-            <Button key={index}
-              className={activeIndex === index ? 'active' : ''}
-              onClick={() => setActiveIndex(index)}>{item.label}
-            </Button>
+          <Button
+            key={index}
+            className={activeIndex === index ? 'active' : ''}
+            onClick={() => handleButtonClick(index)}>{item.label}
+          </Button>
         ))}
       </ButtonBar>
       <div>
