@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 import React, { useState, useEffect } from 'react';
 import DrinkMenu from './DrinkMenu';
+import DrinkCustomizer from './Customize';
 import Welcome from './Welcome';
 import TabMenu from './TabMenu';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -54,7 +55,7 @@ function Menu() {
       case 'trending':
         return <p>Content for Trending</p>;
       case 'customize':
-        return <p>Content for Customize</p>;
+        return <DrinkCustomizer />;
       default:
         return <Welcome />;
     }

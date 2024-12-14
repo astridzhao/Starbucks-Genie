@@ -3,7 +3,6 @@ import styled from 'styled-components';
 import DrinkGrid from './DrinkGrid';
 import TabMenu from './TabMenu';
 import { useNavigate, useLocation } from 'react-router-dom';// Import useNavigate
-import { Tab } from '@headlessui/react';
 
 const ButtonBar = styled.div`
   display: flex;
@@ -89,7 +88,7 @@ function DrinkMenu() {
   return (
     <div className="drink-bar">
       <TabMenu />
-      <ButtonBar style={{padding:"30px"}}>
+      <ButtonBar style={{ padding: "30px" }}>
         {items.map((item, index) => (
           <Button
             key={index}

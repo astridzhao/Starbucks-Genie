@@ -3,8 +3,6 @@ import DrinkCard from './DrinkCard';
 import styled from 'styled-components';
 import supabase from '../db/supabase-client';
 import { useNavigate, useLocation } from 'react-router-dom';
-import Menu from './Menu';
-
 
 const GridContainer = styled.div`
   display: flex;
@@ -53,7 +51,7 @@ const DrinksGrid = () => {
         let { data } = await supabase
           .from(table)
           .select('*')
-          .eq('category', drinkCategory);// Select only needed fields
+          .eq('category', drinkCategory);
         if (data) {
           console.log("Fetched drinks:", data);
           setDrinks(data);
@@ -69,7 +67,7 @@ const DrinksGrid = () => {
     fetchDrinks();
   }, [drinkCategory]);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <div style={{ margin: '20px', padding: '10px' }}><p>Loading...</p></div>;
 
   return (
     <div className="drink-grid">
