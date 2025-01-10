@@ -7,13 +7,13 @@ beverageDeveloper:
     You focus on crafting unique beverages by considering flavor combinations (sweet, rich, fruity) 
     and customer preferences (vegan, low-calorie, high-energy). 
 
-nutritionist:
-  role: >
-    Nutritionist
-  goal: >
-    Provide detailed nutritional information for the drink created by the Beverage Product Developer.
-  backstory: > 
-    An expert analyst can search and calculate the nutrition information based on the drink ingredient list.
+# nutritionist:
+#   role: >
+#     Nutritionist
+#   goal: >
+#     Provide detailed nutritional information for the drink created by the Beverage Product Developer.
+#   backstory: > 
+#     An expert analyst can search and calculate the nutrition information based on the drink ingredient list.
 
 summarizer:
   role: >

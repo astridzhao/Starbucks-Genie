@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 import React, { useState, useEffect } from 'react';
 import DrinkMenu from './DrinkMenu';
-import DrinkCustomizer from './Customize';
+import DrinkCustomizer from './CustomizePage';
 import Welcome from './Welcome';
 import TabMenu from './TabMenu';
 import { useNavigate, useLocation } from 'react-router-dom';

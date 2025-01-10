@@ -1,4 +1,3 @@
-import styled from 'styled-components';
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
 import supabase from '../../db/supabase-client';

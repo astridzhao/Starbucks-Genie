@@ -1,5 +1,5 @@
-import config
-from crewai import Agent, Task, Crew, Process
+# import config
+from crewai import Agent, Task, Crew, Process, LLM
 from crewai.project import CrewBase, agent, crew, task
 from crewai.tasks.output_format import OutputFormat
 import os
@@ -15,14 +15,6 @@ from typing import List, Optional, Type
 from pydantic import BaseModel, Field, model_validator
 from pydantic_core import PydanticCustomError
 
-#=================
-# LLM object and API Key
-#=================
-os.environ["COHERE_API_KEY"] = config.cohere_key
-# os.environ["OPENAI_MODEL_NAME"]="gpt-4o-mini"
-# os.environ["OPENAI_API_KEY"] = config.openai_key
-
-llm = ChatCohere()
 
 #=================
 # CrewAI Tools https://github.com/crewAIInc/crewAI-examples/blob/main/job-posting/src/job_posting/job_description_example.md
@@ -66,7 +58,7 @@ class NutritiousInfo(BaseModel):
 class DrinkInfo(BaseModel):
     name: str = Field(..., description="Name of the drink")
     ingredient: List[str]  = Field(..., description="List of ingredients")
-    nutrition: List[str]  = Field(..., description="List of nutrition data")
+    # nutrition: List[str]  = Field(..., description="List of nutrition data")
     recommendation: str = Field(..., description="reason why innovate the drink")
     
 #=================
@@ -74,18 +66,19 @@ class DrinkInfo(BaseModel):
 #=================
 @CrewBase
 class DrinkInnovationCrew:
+
     """StarbucksGenie drink innovation crew"""
     agents_config = 'config/agents.yaml'
     tasks_config = 'config/tasks.yaml'
     
     @agent
-    def innovator(self) -> Agent:
+    def innovator(self, ) -> Agent:
         return Agent(
             config=self.agents_config['beverageDeveloper'],
             allow_delegation=False,
             verbose=True,
             tools=[ingredients_read_tool], 
-            llm = llm,
+            # llm = llm,
     )
 
     @task
@@ -96,22 +89,22 @@ class DrinkInnovationCrew:
             output_json=DrinkIngredients,
     )
         
-    @agent
-    def nutritionist(self) -> Agent:
-        return Agent(
-            config=self.agents_config['nutritionist'],
-            allow_delegation=False,
-            verbose=True,
-            llm = llm
-    )
+    # @agent
+    # def nutritionist(self) -> Agent:
+    #     return Agent(
+    #         config=self.agents_config['nutritionist'],
+    #         allow_delegation=False,
+    #         verbose=True,
+    #         # llm = llm
+    # )
         
-    @task
-    def nutrition_calculation(self) -> Task: 
-        return Task(
-            config=self.tasks_config['nutritionCalculate'],
-            agent=self.nutritionist(),
-            output_json=NutritiousInfo,
-    )
+    # @task
+    # def nutrition_calculation(self) -> Task: 
+    #     return Task(
+    #         config=self.tasks_config['nutritionCalculate'],
+    #         agent=self.nutritionist(),
+    #         output_json=NutritiousInfo,
+    # )
         
     @agent
     def summarizer(self) -> Agent:
@@ -119,7 +112,7 @@ class DrinkInnovationCrew:
             config=self.agents_config['summarizer'],
             allow_delegation=False,
             verbose=True,
-            llm=llm
+            # llm=llm
     )
         
     @task

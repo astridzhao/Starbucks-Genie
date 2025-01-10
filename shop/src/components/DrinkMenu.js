@@ -28,7 +28,6 @@ const Button = styled.button`
     background-color: #00623B;
     color: white;
     font-size: 15px;
-    font-family:'Menlo';
     font-weight: bold; 
   }
 
