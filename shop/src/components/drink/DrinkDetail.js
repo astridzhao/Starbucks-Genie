@@ -38,7 +38,6 @@ export default function DrinkDetail() {
                         ? JSON.parse(data.descriptions)
                         : data.descriptions;
                     setDrink({ ...data, descriptions: parsedDescriptions });
-                    // console.log("Combined drink details:", data);
                 }
                 catch (error) {
                     console.error('Error fetching drink details:', error.message);

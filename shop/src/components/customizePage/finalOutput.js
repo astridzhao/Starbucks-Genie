@@ -11,73 +11,94 @@ const Title = styled.h2`
     font-size: 1.25rem;
     font-weight: bold;
     margin-bottom: 1rem;
-    font-family:'Menlo';
+    font-family: 'Menlo';
 `;
 
-const OutputContainer = styled.div`
+const ReceiptContainer = styled.div`
     flex-grow: 1;
     overflow: auto;
     border: 2px solid #d1d5db;
     border-radius: 0.375rem;
-    padding: 1rem;
+    padding: 1.5rem;
     min-height: 200px;
     max-height: 400px;
-    margin-bottom: 2rem;
+    font-family: 'Menlo', monospace;
+    background-color: #ffffff;
 `;
 
-const DrinkCard = styled.div`
+const DrinkLabel = styled.div`
+    border: 1px solid #d1d5db;
+    padding: 1rem;
     margin-bottom: 1rem;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+`;
+
+const DrinkName = styled.div`
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    border-bottom: 1px dashed #d1d5db;
+    padding-bottom: 0.5rem;
 `;
 
 const IngredientList = styled.ul`
-    list-style-type: disc;
-    padding-left: 1.25rem;
+    list-style: none;
+    padding: 0;
     margin: 0.5rem 0;
 `;
 
-const Label = styled.strong`
-    font-weight: 600;
-    margin-right: 0.5rem;
+const IngredientItem = styled.li`
+    padding: 0.25rem 0;
+    font-size: 0.9rem;
+    &:before {
+        content: '• ';
+        color: #006241;
+    }
+`;
+
+const RecommendationBox = styled.div`
+    margin-top: 1rem;
+    padding: 0.5rem;
+    border-top: 1px dashed #d1d5db;
+    font-size: 0.9rem;
+    color: #666;
 `;
 
 const EmptyMessage = styled.p`
     color: #9ca3af;
+    text-align: center;
+    padding: 2rem;
 `;
 
 const FinalOutput = ({ drinkInfoList = [] }) => {
-    console.log("FinalOutput received:", drinkInfoList);
     return (
         <Container>
-            <Title>Final Output</Title>
-            <OutputContainer>
+            <Title>Your Drink</Title>
+            <ReceiptContainer>
                 {drinkInfoList?.length === 0 ? (
-                    <EmptyMessage>No job result been returned yet.</EmptyMessage>
+                    <EmptyMessage>No drink created yet...</EmptyMessage>
                 ) : (
                     drinkInfoList.map((drinkInfo, index) => (
-                        <DrinkCard key={index}>
-                            <p>
-                                <Label>Name:</Label>
+                        <DrinkLabel key={index}>
+                            <DrinkName>
                                 {drinkInfo.name}
-                            </p>
-                            <div>
-                                <Label>Ingredients:</Label>
-                                <IngredientList>
-                                    {Array.isArray(drinkInfo.ingredient) ?
-                                        drinkInfo.ingredient.map((ing, i) => (
-                                            <li key={i}>{ing}</li>
-                                        ))
-                                        : <li>{drinkInfo.ingredient}</li>
-                                    }
-                                </IngredientList>
-                            </div>
-                            <p>
-                                <Label>Recommendation:</Label>
+                            </DrinkName>
+                            <IngredientList>
+                                {Array.isArray(drinkInfo.ingredient) ?
+                                    drinkInfo.ingredient.map((ing, i) => (
+                                        <IngredientItem key={i}>{ing}</IngredientItem>
+                                    ))
+                                    : <IngredientItem>{drinkInfo.ingredient}</IngredientItem>
+                                }
+                            </IngredientList>
+                            <RecommendationBox>
                                 {drinkInfo.recommendation}
-                            </p>
-                        </DrinkCard>
+                            </RecommendationBox>
+                        </DrinkLabel>
                     ))
                 )}
-            </OutputContainer>
+            </ReceiptContainer>
         </Container>
     );
 };

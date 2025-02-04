@@ -26,6 +26,8 @@ import toast from "react-hot-toast";
  * @property {EventType[]} events 
  */
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+
 export const useCrewJob = () => {
     // State 
     const [running, setRunning] = useState(false)
@@ -43,7 +45,7 @@ export const useCrewJob = () => {
         let intervalId;
         const fetchJobStatus = async () => {
             try {
-                const response = await axios.get(`http://localhost:3001/api/drink/${currentJobId}`);
+                const response = await axios.get(`${API_URL}/api/drink/${currentJobId}`);
                 const { status, result, events: fetchedEvents } = response.data;
 
                 // Update events only if we have new ones
@@ -89,7 +91,7 @@ export const useCrewJob = () => {
 
         // request backend
         try {
-            const response = await axios.post("http://localhost:3001/api/drink", {
+            const response = await axios.post(`${API_URL}/api/drink`, {
                 'user-preference': userInput,
                 'user-input': userPreference,
             }, {

@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from threading import Lock
 from typing import Dict, List
 
@@ -14,23 +14,35 @@ class Job:
     events: List[Event]
     result: str
 
-jobs_lock = Lock()
-jobs: Dict[str, Job] = {}
+class JobManager:
+    def __init__(self):
+        self.jobs = {}
+        self.lock = Lock()
+        
+    def cleanup_old_jobs(self, max_age_hours=1):
+        with self.lock:
+            now = datetime.now()
+            to_delete = []
+            for job_id, job in self.jobs.items():
+                if job.created_at < now - timedelta(hours=max_age_hours):
+                    to_delete.append(job_id)
+            for job_id in to_delete:
+                del self.jobs[job_id]
 
-def append_event(job_id: str, event_data: str):
-    with jobs_lock:
-        if job_id not in jobs:
-            print(f"Start job: ", job_id)
-            jobs[job_id] = Job(
-                status="STARTED",
-                events=[],
-                result=""
-            )
-        else:
-            print(f"Appending event for job: ", job_id)
-            job = jobs[job_id]
-            job.events.append(
-                Event(
-                    timestamp=datetime.now(),
-                    data=event_data)
-            )
+    def append_event(self, job_id: str, event_data: str):
+        with self.lock:
+            if job_id not in self.jobs:
+                print(f"Start job: ", job_id)
+                self.jobs[job_id] = Job(
+                    status="STARTED",
+                    events=[],
+                    result=""
+                )
+            else:
+                print(f"Appending event for job: ", job_id)
+                job = self.jobs[job_id]
+                job.events.append(
+                    Event(
+                        timestamp=datetime.now(),
+                        data=event_data)
+                )
