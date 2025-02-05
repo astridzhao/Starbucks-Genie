@@ -11,6 +11,9 @@ import queue
 from dotenv import load_dotenv
 from flask_cors import CORS
 import os
+import logging
+
+logging.basicConfig(level=logging.INFO) 
 
 # Load environment variables from .env file
 load_dotenv()
@@ -108,10 +111,13 @@ def get_status(job_id):
                     'message': 'Job not found'
                 }), 404
             
-            print("Job found:", job_id)
-            print("Job status:", job.status)
-            print("Job result:", job.result)
-            
+            # print("Job found:", job_id)
+            # print("Job status:", job.status)
+            # print("Job result:", job.result)
+            logging.info("Job found: %s", job_id)
+            logging.info("Job status: %s", job.status)
+            logging.info("Job result: %s", job.result)
+        
             try:
                 result_json = json.loads(job.result) if job.result else None
             except:
