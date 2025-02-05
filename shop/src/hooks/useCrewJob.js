@@ -26,7 +26,7 @@ import toast from "react-hot-toast";
  * @property {EventType[]} events 
  */
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+const API_URL = process.env.RAILWAY_APP_API_URL || 'http://localhost:3001';
 
 export const useCrewJob = () => {
     // State 
