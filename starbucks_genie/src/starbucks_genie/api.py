@@ -11,7 +11,6 @@ import queue
 from dotenv import load_dotenv
 from flask_cors import CORS
 import os
-# from litellm import LiteLLM
 
 # Load environment variables from .env file
 load_dotenv()
