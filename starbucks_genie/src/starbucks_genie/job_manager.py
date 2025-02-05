@@ -32,17 +32,17 @@ class JobManager:
     def append_event(self, job_id: str, event_data: str):
         with self.lock:
             if job_id not in self.jobs:
-                print(f"Start job: ", job_id)
+                print(f"Creating new job: {job_id}")
                 self.jobs[job_id] = Job(
                     status="STARTED",
                     events=[],
                     result=""
                 )
-            else:
-                print(f"Appending event for job: ", job_id)
-                job = self.jobs[job_id]
-                job.events.append(
-                    Event(
-                        timestamp=datetime.now(),
-                        data=event_data)
+            
+            print(f"Appending event to job {job_id}: {event_data}")
+            self.jobs[job_id].events.append(
+                Event(
+                    timestamp=datetime.now(),
+                    data=event_data
                 )
+            )

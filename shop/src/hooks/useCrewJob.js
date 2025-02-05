@@ -40,12 +40,18 @@ export const useCrewJob = () => {
     /** @type {DrinkInfo[]} */
     const [drinkInfo, setDrinkInfo] = useState([]);
     const [currentJobId, setCurrentJobId] = useState('');
+    const config = {
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    };
 
     useEffect(() => {
         let intervalId;
         const fetchJobStatus = async () => {
             try {
-                const response = await axios.get(`${API_URL}/api/drink/${currentJobId}`);
+                console.log("API_URL: ", API_URL);
+                const response = await axios.get(`${API_URL}/api/drink/${currentJobId}`, config);
                 const { status, result, events: fetchedEvents } = response.data;
 
                 // Update events only if we have new ones
@@ -67,8 +73,12 @@ export const useCrewJob = () => {
             } catch (error) {
                 clearInterval(intervalId);
                 console.error("Job Fetch Failed: ", error);
-                setCurrentJobId("");
-                toast.error("Job failed.");
+                if (error.response?.status === 404) {
+                    setCurrentJobId("");
+                    toast.error("Job not found");
+                } else {
+                    toast.error("Failed to fetch job status");
+                }
             }
         };
 
@@ -87,18 +97,14 @@ export const useCrewJob = () => {
         // clean up old job
         setEvents([]);
         setDrinkInfo([]);
-        setRunning(true)
+        setRunning(true);
 
         // request backend
         try {
             const response = await axios.post(`${API_URL}/api/drink`, {
                 'user-preference': userInput,
                 'user-input': userPreference,
-            }, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
+            }, config);
             // update the state (job_id, etc.)
             toast.success("Job started.")
             console.log("Job started: ", response.data)
@@ -106,8 +112,9 @@ export const useCrewJob = () => {
             setDrinkInfo(response.data.DrinkInfo)
         } catch (error) {
             toast.error("Job failed to start.")
-            console.log("Job failed: ", error.response.data);
+            console.log("Job failed: ", error.response?.data);
             setCurrentJobId("");
+            setRunning(false);  // Reset running state on error
         }
 
     }

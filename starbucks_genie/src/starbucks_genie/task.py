@@ -1,17 +1,17 @@
 from crewai import Task
-from models import DrinkIngredients, NutritiousInfo, DrinkInfo
+from .models import DrinkIngredients, NutritiousInfo, DrinkInfo
 from textwrap import dedent
-
-from job_manager import append_event
+from .job_manager import JobManager
 
 class DrinkGeneratorTasks:
     def __init__(self, job_id) :
         self.job_id = job_id
+        self.job_manager = JobManager()
     
     def append_event_callback(self, task_output):
         print(f"Append event for {self.job_id}")
         print(f"Task output: {task_output}")
-        append_event(job_id=self.job_id, event_data=task_output.expected_output)
+        self.job_manager.append_event(job_id=self.job_id, event_data=task_output.expected_output)
         
     def innovate_drink(self, agent, user_preference, user_input) -> Task:
         task = Task(

@@ -3,9 +3,9 @@ import json
 from threading import Thread, Lock
 from uuid import uuid4
 from flask import Flask, abort, jsonify, request
-from crew import drinkCreateCrew
+from .crew import drinkCreateCrew
 # from job_manager import Event, append_event, jobs_lock, jobs
-from job_manager import Event, JobManager
+from .job_manager import Event, JobManager
 from concurrent.futures import ThreadPoolExecutor
 import queue
 from dotenv import load_dotenv
@@ -19,7 +19,11 @@ load_dotenv()
 api_key = os.getenv('OPENAI_API_KEY')
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+
+CORS(app, 
+     origins=["http://localhost:3000", "https://starbucks-genie.vercel.app"],
+     allow_headers=["Content-Type"],
+     methods=["GET", "POST", "OPTIONS"])
 
 # Create a thread pool to manage concurrent requests
 executor = ThreadPoolExecutor(max_workers=5)  # Limit concurrent jobs
@@ -69,50 +73,66 @@ def kickoff_crew(job_id, user_preference, user_input):
 
 @app.route('/api/drink', methods=['POST'])
 def run_crew():
-    data = request.json
-    
-    # Set default values for empty inputs
-    user_preference = data.get('user-preference', [])
-    user_input = data.get('user-input', [])
-    # If both are empty, use default inspiration mode
-    if not user_preference and not user_input:
-        user_input = ["Surprise me with something creative and unique"]
-        user_preference = ["I'm open to trying new flavors"]
-    
-    job_id = str(uuid4())
-    
-    # thread = Thread(target=kickoff_crew, args=(job_id, user_preference, user_input))
-    # thread.start()
-    
-    # Submit job to thread pool instead of creating new thread
-    executor.submit(kickoff_crew, job_id, user_preference, user_input)
-    return jsonify({'job_id': job_id}), 200
+    try:
+        data = request.json
+        user_preference = data.get('user-preference', [])
+        user_input = data.get('user-input', [])
+        
+        if not user_preference and not user_input:
+            user_input = ["Surprise me with something creative and unique"]
+            user_preference = ["I'm open to trying new flavors"]
+        
+        job_id = str(uuid4())
+        
+        # Initialize the job before submitting to thread pool
+        job_manager.append_event(job_id, "Job initialized")
+        
+        # Submit job to thread pool
+        executor.submit(kickoff_crew, job_id, user_preference, user_input)
+        return jsonify({'job_id': job_id}), 200
+    except Exception as e:
+        print(f"Error in run_crew: {str(e)}")
+        return jsonify({
+            'status': 'ERROR',
+            'message': str(e)
+        }), 500
 
 @app.route('/api/drink/<job_id>', methods=['GET'])
 def get_status(job_id):
-    # Lock the job
-    with job_manager.lock:
-        job = job_manager.jobs.get(job_id)
-        print("Job status is: ", job.status)
-        # Check if job exist
-        if not job:
-            abort(404, description="Job not found")
-        
-        try:
-            result_json = json.loads(job.result) if job.result else None
-        except:
-            result_json = job.result 
+    try:
+        # Lock the job
+        with job_manager.lock:
+            job = job_manager.jobs.get(job_id)
+            if not job:
+                return jsonify({
+                    'status': 'NOT_FOUND',
+                    'message': 'Job not found'
+                }), 404
+            
+            print("Job found:", job_id)
+            print("Job status:", job.status)
+            print("Job result:", job.result)
+            
+            try:
+                result_json = json.loads(job.result) if job.result else None
+            except:
+                result_json = job.result 
 
-        # print("Final Result: ", result_json)  
+            return jsonify({
+                'job_id': job_id,
+                'status': job.status,
+                'result': result_json,
+                'events': [
+                    {'timestamp': event.timestamp.isoformat(),
+                     'data': event.data} for event in job.events
+                ]
+            }), 200
+    except Exception as e:
+        print(f"Error in get_status: {str(e)}")
         return jsonify({
-            'job_id': job_id,
-            'status': job.status,
-            'result': result_json,
-            'events': [
-                {'timestamp': event.timestamp.isoformat(),
-                'data': event.data} for event in job.events
-            ]
-        }), 200
+            'status': 'ERROR',
+            'message': str(e)
+        }), 500
 
 if __name__== '__main__':
     app.run(debug=True, port=3001, threaded=True)

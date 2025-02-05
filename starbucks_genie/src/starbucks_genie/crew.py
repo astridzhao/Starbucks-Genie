@@ -1,12 +1,13 @@
 from crewai import Crew
-from agent import DrinkGeneratorAgents
-from job_manager import append_event
-from task import DrinkGeneratorTasks
+from .agent import DrinkGeneratorAgents
+from .job_manager import JobManager
+from .task import DrinkGeneratorTasks
 
 class drinkCreateCrew:
     def __init__(self, job_id:str):
         self.job_id = job_id
         self.crew = None
+        self.job_manager = JobManager()
     
     def setup_crew(self, user_preference, user_input):
         print(f"Set up crew for make drink with {user_preference} and {user_input}")
@@ -31,20 +32,20 @@ class drinkCreateCrew:
             print(f"Set up crew FAILED: {str(e)}")
         
     def kickoff(self):
-        append_event(self.job_id, "Starting beverage development...")
+        self.job_manager.append_event(self.job_id, "Starting beverage development...")
         #kick off crew 
         if not self.crew:
             print(f"No crew found for job id {self.job_id}")
             return 
         
         print("kick off crew STARTED")
-        append_event(self.job_id, "CREW STARTED")
+        self.job_manager.append_event(self.job_id, "CREW STARTED")
         try:
             print(f"kick off crew for job id {self.job_id}")
             results = self.crew.kickoff()
-            append_event(self.job_id, "CREW COMPLETED")
+            self.job_manager.append_event(self.job_id, "CREW COMPLETED")
             return results
         except Exception as e:
-            append_event(self.job_id, f"CREW FAILED: {str(e)}")
+            self.job_manager.append_event(self.job_id, f"CREW FAILED: {str(e)}")
             return "kick off crew failed" + str(e)
         
