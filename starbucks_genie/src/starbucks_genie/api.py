@@ -114,9 +114,15 @@ def get_status(job_id):
         with job_manager.lock:
             job = job_manager.jobs.get(job_id)
             if not job:
+                logging.error(f"Job not found: {job_id}")
+                logging.error(f"Available jobs: {list(job_manager.jobs.keys())}")
                 return jsonify({
                     'status': 'NOT_FOUND',
-                    'message': 'Job not found'
+                    'message': 'Job not found',
+                    'debug_info': {
+                        'timestamp': datetime.now().isoformat(),
+                        'available_jobs': list(job_manager.jobs.keys())
+                    }
                 }), 404
             
             # print("Job found:", job_id)
