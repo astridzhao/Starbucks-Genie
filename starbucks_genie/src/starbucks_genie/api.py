@@ -25,6 +25,7 @@ app = Flask(__name__)
 CORS(app, 
      origins=["http://localhost:3000", "https://starbucks-genie.vercel.app"],
      allow_headers=["Content-Type"],
+     supports_credentials=True,
      methods=["GET", "POST", "OPTIONS"])
 
 # Create a thread pool to manage concurrent requests
@@ -72,6 +73,13 @@ def kickoff_crew(job_id, user_preference, user_input):
                 ))
     except Exception as e:
         print(f"Unexpected error in job {job_id}: {str(e)}")
+
+@app.route('/api/drink', methods=['OPTIONS'])
+@app.route('/api/drink/<job_id>', methods=['OPTIONS'])
+def handle_options(job_id=None):
+    response = jsonify({'message': 'CORS preflight successful'})
+    response.status_code = 204
+    return response
 
 @app.route('/api/drink', methods=['POST'])
 def run_crew():
