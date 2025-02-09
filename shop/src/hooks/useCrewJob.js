@@ -104,10 +104,6 @@ export const useCrewJob = () => {
                 'user-preference': userInput,
                 'user-input': userPreference,
             }, config);
-
-            // Add a small delay before starting to poll
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
             // update the state (job_id, etc.)
             toast.success("Job started.")
             console.log("Job started: ", response.data)
