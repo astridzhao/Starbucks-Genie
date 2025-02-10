@@ -94,6 +94,11 @@ def run_crew():
         
         job_id = str(uuid4())
         
+        # Check if the job already exists
+        with job_manager.lock:
+            if job_id in job_manager.jobs:
+                return jsonify({'status': 'ERROR', 'message': 'Job already exists'}), 400
+        
         # Initialize the job before submitting to thread pool
         job_manager.append_event(job_id, "Job initialized")
         
@@ -154,4 +159,4 @@ def get_status(job_id):
         }), 500
 
 if __name__== '__main__':
-    app.run(debug=True, port=3001, threaded=True)
+    app.run(debug=True, port=os.getenv("PORT", default=3001),  threaded=True)

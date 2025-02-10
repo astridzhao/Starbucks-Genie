@@ -43,6 +43,7 @@ class drinkCreateCrew:
         try:
             print(f"kick off crew for job id {self.job_id}")
             results = self.crew.kickoff()
+            print("kick off crew COMPLETED")
             self.job_manager.append_event(self.job_id, "CREW COMPLETED")
             return results
         except Exception as e:

@@ -73,12 +73,14 @@ export const useCrewJob = () => {
             } catch (error) {
                 clearInterval(intervalId);
                 console.error("Job Fetch Failed: ", error);
-                if (error.response?.status === 404) {
-                    setCurrentJobId("");
-                    toast.error("Job not found");
-                } else {
-                    toast.error("Failed to fetch job status");
-                }
+                setCurrentJobId("");
+                toast.error("Job failed.");
+                // if (error.response?.status === 404) {
+                //     setCurrentJobId("");
+                //     toast.error("Job not found");
+                // } else {
+                //     toast.error("Failed to fetch job status");
+                // }
             }
         };
 
