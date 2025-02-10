@@ -29,7 +29,7 @@ CORS(app,
      methods=["GET", "POST", "OPTIONS"])
 
 # Create a thread pool to manage concurrent requests
-executor = ThreadPoolExecutor(max_workers=2)  # Limit concurrent jobs
+executor = ThreadPoolExecutor(max_workers=1)  # Limit concurrent jobs
 job_queue = queue.Queue()
 
 # Initialize job manager
