@@ -159,4 +159,4 @@ def get_status(job_id):
         }), 500
 
 if __name__== '__main__':
-    app.run(debug=True, port=os.getenv("PORT", default=3001),  threaded=True)
+    app.run(debug=True, port=os.getenv("PORT", default=3001)) #,  threaded=True
