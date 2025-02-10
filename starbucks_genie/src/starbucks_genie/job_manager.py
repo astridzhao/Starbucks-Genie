@@ -31,6 +31,7 @@ class JobManager:
 
     def append_event(self, job_id: str, event_data: str):
         with self.lock:
+            print("Current job: ", self.jobs.items());
             if job_id not in self.jobs:
                 print(f"Creating new job: {job_id}")
                 self.jobs[job_id] = Job(
