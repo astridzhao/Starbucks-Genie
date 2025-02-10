@@ -22,11 +22,11 @@ api_key = os.getenv('OPENAI_API_KEY')
 
 app = Flask(__name__)
 
-CORS(app, 
-     origins=["http://localhost:3000", "https://starbucks-genie.vercel.app"],
-     allow_headers=["Content-Type"],
-     supports_credentials=True,
-     methods=["GET", "POST", "OPTIONS"])
+# CORS(app, 
+#      origins=["http://localhost:3000", "https://starbucks-genie.vercel.app"],
+#      allow_headers=["Content-Type"],
+#      supports_credentials=True,
+#      methods=["GET", "POST", "OPTIONS"])
 
 # Create a thread pool to manage concurrent requests
 executor = ThreadPoolExecutor(max_workers=1)  # Limit concurrent jobs

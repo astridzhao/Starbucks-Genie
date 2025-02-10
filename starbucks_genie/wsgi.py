@@ -9,9 +9,6 @@ CORS(app,
      supports_credentials=True,
      methods=["GET", "POST", "OPTIONS"])
 
-app = Flask(__name__)
-app.config['DEBUG'] = True 
 @app.route('/')
-
 def home():
     return "Welcome to the Starbucks Genie API!"
