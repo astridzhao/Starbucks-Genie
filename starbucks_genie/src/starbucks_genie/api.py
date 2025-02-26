@@ -29,7 +29,7 @@ app = Flask(__name__)
 #      methods=["GET", "POST", "OPTIONS"])
 
 # Create a thread pool to manage concurrent requests
-executor = ThreadPoolExecutor(max_workers=1)  # Limit concurrent jobs
+executor = ThreadPoolExecutor(max_workers=5)  # Limit concurrent jobs
 job_queue = queue.Queue()
 
 # Initialize job manager
@@ -130,9 +130,6 @@ def get_status(job_id):
                     }
                 }), 404
             
-            # print("Job found:", job_id)
-            # print("Job status:", job.status)
-            # print("Job result:", job.result)
             logging.info("Job found: %s", job_id)
             logging.info("Job status: %s", job.status)
             logging.info("Job result: %s", job.result)

@@ -63,7 +63,7 @@ export const useCrewJob = () => {
                     console.log("Received result:", result);
                     setDrinkInfo([result]);
                 }
-                if (status === "SUCCESS" || status === "ERROR") {
+                if (status === "SUCCESS") {
                     if (intervalId) {
                         clearInterval(intervalId);
                     }
