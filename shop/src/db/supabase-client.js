@@ -1,12 +1,6 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
 
-// Your Supabase URL and API Key
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
-const supabaseAnonKey = process.env.REACT_APP_SUPABASE_KEY;
-
-// Initialization: Create a single Supabase client for interacting with your database
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
-console.log('Supabase URL:', supabaseUrl);
-console.log('Supabase Key:', supabaseAnonKey);
-
+const url = import.meta.env.VITE_SUPABASE_URL;
+const key = import.meta.env.VITE_SUPABASE_KEY;
+const supabase = url && key ? createClient(url, key) : null;
 export default supabase;

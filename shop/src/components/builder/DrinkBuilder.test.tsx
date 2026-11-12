@@ -1,0 +1,36 @@
+import React from 'react';
+import { render, screen, fireEvent, within } from '@testing-library/react';
+import { beforeEach, vi } from 'vitest';
+import DrinkBuilder from './DrinkBuilder';
+beforeEach(() => {
+  localStorage.clear();
+  Element.prototype.scrollIntoView = vi.fn();
+  vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => { callback(0); return 1; });
+});
+test('start with Latte, change milk and save named orders that survive remounting', () => {
+  const { unmount } = render(<DrinkBuilder />);
+  const starter = screen.getByRole('region', { name: 'Start with a drink' });
+  fireEvent.click(within(starter).getByRole('button', { name: /^Iced Caffè Latte/ }));
+  expect(screen.getByRole('combobox', { name: 'Base' })).toHaveValue('iced-latte');
+  expect(screen.getByRole('combobox', { name: 'Milk' })).toHaveValue('63');
+  expect(screen.queryByRole('combobox', { name: 'Milk amount' })).not.toBeInTheDocument();
+  expect(screen.getByLabelText('Shots quantity')).toHaveTextContent('2');
+  const preview = screen.getByRole('region', { name: 'Drink preview' });
+  expect(preview).toHaveTextContent('130');
+  expect(preview).toHaveTextContent('Official standard recipe');
+  fireEvent.change(screen.getByRole('combobox', { name: 'Milk' }), { target: { value: '2121965' } });
+  expect(preview).toHaveTextContent('Estimated total');
+  fireEvent.change(screen.getByRole('textbox', { name: 'Order name (optional)' }), { target: { value: 'Morning Latte' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Save order' }));
+  fireEvent.change(screen.getByRole('combobox', { name: 'Base' }), { target: { value: 'cold-brew' } });
+  fireEvent.change(screen.getByRole('textbox', { name: 'Order name (optional)' }), { target: { value: 'Afternoon brew' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Save order' }));
+  unmount(); render(<DrinkBuilder />);
+  expect(screen.getByText('Saved orders · 2')).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Morning Latte' }));
+  expect(screen.getByRole('combobox', { name: 'Base' })).toHaveValue('iced-latte');
+  expect(screen.getByRole('combobox', { name: 'Milk' })).toHaveValue('2121965');
+  expect(screen.getByRole('link', { name: 'Open Starbucks menu' })).toHaveAttribute('href', 'https://www.starbucks.com/menu/product/407/iced');
+  fireEvent.click(screen.getByRole('button', { name: 'Delete saved order Afternoon brew' }));
+  expect(screen.getByText('Saved orders · 1')).toBeInTheDocument();
+});

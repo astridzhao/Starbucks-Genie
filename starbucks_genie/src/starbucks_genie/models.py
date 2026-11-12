@@ -10,8 +10,8 @@ class DrinkIngredients(BaseModel):
     type_of_beverage: str = Field(..., description="Choose one of three preparation methods: 'Hot', 'Iced', 'Blended'")
     base: str = Field(..., description="Choose one base from: 'coffee', 'green tea', 'black tea', 'espresso'")
     tea:  str  = Field(..., description="choose one from: 'no added', 'add chai'")
-    powder: List[str]  = Field(..., description="powders from 'chocolate malt powder', 'vanilla bean powder'"),
-    sauces: List[str]  = Field(..., description="list of sauces 'dark caramel', 'mocha sauce', 'pumpkin sauce', 'white chocolate mocha sauce'"),
+    powder: List[str]  = Field(..., description="powders from 'chocolate malt powder', 'vanilla bean powder'")
+    sauces: List[str]  = Field(..., description="list of sauces 'dark caramel', 'mocha sauce', 'pumpkin sauce', 'white chocolate mocha sauce'")
     syrup: List[str] = Field(..., description="List of syrups from: 'apple brown syrup', 'Brown Sugar Syrup', 'Caramel Syrup', 'Cinnamon Dolce Syrup', 'Hazelnut Syrup', 'Peppermint Syrup', 'Sugar-Free Vanilla Syrup', 'Toffeenut Syrup', 'Vanilla Syrup'")
     liquid_sweeteners: str = Field(..., description="Choose one from 'classic syrup', 'honey blend'")
     sweetener_packets: List[str] = Field(..., description="Choose one or more from 'honey', 'splenda', 'stevia', 'sugar', 'sugar in the raw'")

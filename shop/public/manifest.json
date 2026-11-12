@@ -1,15 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
-  "icons": [
-    {
-      "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
-    }
-  ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "short_name": "Genie", "name": "Starbucks Genie — Build Your Cup",
+  "icons": [{"src": "/logo.png", "sizes": "900x900", "type": "image/png"}],
+  "start_url": "/customize", "scope": "/", "display": "standalone",
+  "theme_color": "#163c30", "background_color": "#f8faf7"
 }
