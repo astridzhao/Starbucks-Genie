@@ -1,17 +1,16 @@
 from crewai import Task
 from .models import DrinkIngredients, NutritiousInfo, DrinkInfo
 from textwrap import dedent
-from .job_manager import JobManager
 
 class DrinkGeneratorTasks:
-    def __init__(self, job_id) :
+    def __init__(self, job_id, job_manager):
         self.job_id = job_id
-        self.job_manager = JobManager()
+        self.job_manager = job_manager
     
     def append_event_callback(self, task_output):
         print(f"Append event for {self.job_id}")
         print(f"Task output: {task_output}")
-        self.job_manager.append_event(job_id=self.job_id, event_data=task_output.expected_output)
+        self.job_manager.append_event(job_id=self.job_id, event_data=f"Completed: {task_output.description}")
         
     def innovate_drink(self, agent, user_preference, user_input) -> Task:
         task = Task(
@@ -39,7 +38,7 @@ class DrinkGeneratorTasks:
             agent=agent,
             expected_output="""Please provide a summary in JSON format with:
             - name: The final name of the drink
-            - ingredients: List of all ingredients used
+            - ingredient: List of all ingredients used with quantities and ordering instructions
             - recommendation: A compelling reason why customers would enjoy this drink
             """,
             callback=self.append_event_callback,

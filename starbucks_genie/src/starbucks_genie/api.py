@@ -1,159 +1,117 @@
+"""Asynchronous drink creation API. Jobs live in one worker process."""
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 import json
-from threading import Thread, Lock
-from uuid import uuid4
-from flask import Flask, abort, jsonify, request
-from .crew import drinkCreateCrew
-# from job_manager import Event, append_event, jobs_lock, jobs
-from .job_manager import Event, JobManager
-from concurrent.futures import ThreadPoolExecutor
-import queue
-from dotenv import load_dotenv
-from flask_cors import CORS
-import os
 import logging
+import os
+from uuid import uuid4
 
-logging.basicConfig(level=logging.INFO) 
+from dotenv import load_dotenv
+from flask import Flask, jsonify, request
+from flask_cors import CORS
+from werkzeug.exceptions import BadRequest, UnsupportedMediaType
 
-# Load environment variables from .env file
+from .job_manager import Event, JobManager
+
 load_dotenv()
-# Get the API key from the environment variable
-api_key = os.getenv('OPENAI_API_KEY')
-
 app = Flask(__name__)
-
-# CORS(app, 
-#      origins=["http://localhost:3000", "https://starbucks-genie.vercel.app"],
-#      allow_headers=["Content-Type"],
-#      supports_credentials=True,
-#      methods=["GET", "POST", "OPTIONS"])
-
-# Create a thread pool to manage concurrent requests
-executor = ThreadPoolExecutor(max_workers=5)  # Limit concurrent jobs
-job_queue = queue.Queue()
-
-# Initialize job manager
+app.config['MAX_CONTENT_LENGTH'] = 16384
+CORS(app, origins=os.getenv(
+    'CORS_ORIGINS', 'http://localhost:3000,https://starbucks-genie.vercel.app'
+).split(','))
+executor = ThreadPoolExecutor(max_workers=2)
 job_manager = JobManager()
+
+
+def create_crew(job_id):
+    # Defer AI initialization until a job starts, keeping health checks lightweight.
+    from .crew import drinkCreateCrew
+    return drinkCreateCrew(job_id, job_manager)
+
 
 def kickoff_crew(job_id, user_preference, user_input):
     try:
-        with job_manager.lock:  # Use job_manager's lock
-            if job_id not in job_manager.jobs:
-                print(f"Job {job_id} was cancelled or doesn't exist")
-                return
-            
-        print(f'run job {job_id} for {user_input, user_preference}')
-        result = None
-        
-        try:
-            #Set up Crew
-            job_manager.append_event(job_id, "Starting drink creation...")
-            crew = drinkCreateCrew(job_id)
-            crew.setup_crew(user_preference, user_input)
-            job_manager.append_event(job_id, "Crew setup completed")
-            
-            #Run Crew
-            result = crew.kickoff()
-            job_manager.append_event(job_id, f"Drink creation completed: {result.name if hasattr(result, 'name') else result}")
-        except Exception as e:
-            print(f"Crew failed for job {job_id}")
-            job_manager.append_event(job_id, f"Error: {str(e)}")
-            with job_manager.lock:
-                job_manager.jobs[job_id].status = "ERROR"
-                job_manager.jobs[job_id].result = str(e)
-            return
-        
-        with job_manager.lock:
-            if job_id in job_manager.jobs:  # Check if job still exists
-                job_manager.jobs[job_id].status = "SUCCESS"
-                job_manager.jobs[job_id].result = result.json_dict if hasattr(result, 'json_dict') else result
-                job_manager.jobs[job_id].events.append(Event(
-                    data="Process completed successfully",
-                    timestamp=datetime.now()
-                ))
-    except Exception as e:
-        print(f"Unexpected error in job {job_id}: {str(e)}")
-
-@app.route('/api/drink', methods=['OPTIONS'])
-@app.route('/api/drink/<job_id>', methods=['OPTIONS'])
-def handle_options(job_id=None):
-    response = jsonify({'message': 'CORS preflight successful'})
-    response.status_code = 204
-    return response
-
-@app.route('/api/drink', methods=['POST'])
-def run_crew():
-    try:
-        data = request.json
-        user_preference = data.get('user-preference', [])
-        user_input = data.get('user-input', [])
-        
-        if not user_preference and not user_input:
-            user_input = ["Surprise me with something creative and unique"]
-            user_preference = ["I'm open to trying new flavors"]
-        
-        job_id = str(uuid4())
-        
-        # Check if the job already exists
-        with job_manager.lock:
-            if job_id in job_manager.jobs:
-                return jsonify({'status': 'ERROR', 'message': 'Job already exists'}), 400
-        
-        # Initialize the job before submitting to thread pool
-        job_manager.append_event(job_id, "Job initialized")
-        
-        # Submit job to thread pool
-        executor.submit(kickoff_crew, job_id, user_preference, user_input)
-        return jsonify({'job_id': job_id}), 200
-    except Exception as e:
-        print(f"Error in run_crew: {str(e)}")
-        return jsonify({
-            'status': 'ERROR',
-            'message': str(e)
-        }), 500
-
-@app.route('/api/drink/<job_id>', methods=['GET'])
-def get_status(job_id):
-    try:
-        # Lock the job
+        job_manager.append_event(job_id, 'Starting drink creation...')
+        crew = create_crew(job_id)
+        crew.setup_crew(user_preference, user_input)
+        result = crew.kickoff()
+        result = result.json_dict if hasattr(result, 'json_dict') else result
+        if isinstance(result, str):
+            result = json.loads(result)
+        if (not isinstance(result, dict)
+                or not isinstance(result.get('name'), str) or not result['name'].strip()
+                or not isinstance(result.get('ingredient'), list)
+                or not result['ingredient']
+                or not all(isinstance(item, str) for item in result['ingredient'])
+                or not isinstance(result.get('recommendation'), str)):
+            raise ValueError('Drink generation returned an invalid recipe')
         with job_manager.lock:
             job = job_manager.jobs.get(job_id)
-            if not job:
-                logging.error(f"Job not found: {job_id}")
-                logging.error(f"Available jobs: {list(job_manager.jobs.keys())}")
-                return jsonify({
-                    'status': 'NOT_FOUND',
-                    'message': 'Job not found',
-                    'debug_info': {
-                        'timestamp': datetime.now().isoformat(),
-                        'available_jobs': list(job_manager.jobs.keys())
-                    }
-                }), 404
-            
-            logging.info("Job found: %s", job_id)
-            logging.info("Job status: %s", job.status)
-            logging.info("Job result: %s", job.result)
-        
-            try:
-                result_json = json.loads(job.result) if job.result else None
-            except:
-                result_json = job.result 
+            if job:
+                job.status = 'SUCCESS'
+                job.result = result
+                job.events.append(Event(datetime.now(), 'Your drink is ready'))
+    except Exception:
+        logging.exception('Drink creation failed for %s', job_id)
+        with job_manager.lock:
+            job = job_manager.jobs.get(job_id)
+            if job:
+                job.status = 'ERROR'
+                job.result = None
+                job.events.append(Event(datetime.now(), 'Drink creation failed. Please try again.'))
 
-            return jsonify({
-                'job_id': job_id,
-                'status': job.status,
-                'result': result_json,
-                'events': [
-                    {'timestamp': event.timestamp.isoformat(),
-                     'data': event.data} for event in job.events
-                ]
-            }), 200
-    except Exception as e:
-        print(f"Error in get_status: {str(e)}")
+
+@app.get('/')
+@app.get('/api/health')
+def health():
+    return jsonify({'status': 'ok', 'ai_configured': bool(os.getenv('OPENAI_API_KEY'))})
+
+
+@app.post('/api/drink')
+def run_crew():
+    try:
+        data = request.get_json()
+    except (BadRequest, UnsupportedMediaType):
+        return jsonify({'message': 'Send a valid JSON object'}), 400
+    if not isinstance(data, dict):
+        return jsonify({'message': 'Send a valid JSON object'}), 400
+    user_preference = data.get('user-preference', [])
+    user_input = data.get('user-input', [])
+    for items in (user_preference, user_input):
+        if (not isinstance(items, list) or len(items) > 20
+                or any(not isinstance(item, str) or len(item) > 500 for item in items)):
+            return jsonify({'message': 'Inputs must be lists of up to 20 strings, each at most 500 characters'}), 400
+    if not os.getenv('OPENAI_API_KEY'):
+        return jsonify({'message': 'Drink generation is not configured. Set OPENAI_API_KEY on the server.'}), 503
+    if not user_preference and not user_input:
+        user_input = ['Surprise me with something creative and unique']
+        user_preference = ["I'm open to trying new flavors"]
+    job_manager.cleanup_old_jobs()
+    job_id = str(uuid4())
+    job_manager.append_event(job_id, 'Job initialized')
+    try:
+        executor.submit(kickoff_crew, job_id, user_preference, user_input)
+    except RuntimeError:
+        with job_manager.lock:
+            job_manager.jobs.pop(job_id, None)
+        return jsonify({'message': 'Drink generation is unavailable. Please try again.'}), 503
+    return jsonify({'job_id': job_id}), 202
+
+
+@app.get('/api/drink/<job_id>')
+def get_status(job_id):
+    with job_manager.lock:
+        job = job_manager.jobs.get(job_id)
+        if not job:
+            return jsonify({'status': 'NOT_FOUND', 'message': 'Job not found'}), 404
         return jsonify({
-            'status': 'ERROR',
-            'message': str(e)
-        }), 500
+            'job_id': job_id,
+            'status': job.status,
+            'result': job.result,
+            'events': [{'timestamp': event.timestamp.isoformat(), 'data': event.data}
+                       for event in job.events],
+        })
 
-if __name__== '__main__':
-    app.run(debug=True, port=os.getenv("PORT", default=3001)) #,  threaded=True
+
+if __name__ == '__main__':
+    app.run(port=int(os.getenv('PORT', '3001')))

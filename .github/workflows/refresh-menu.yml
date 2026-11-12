@@ -1,0 +1,32 @@
+name: Refresh US menu snapshot
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 10 * * *'
+permissions:
+  contents: write
+  pull-requests: write
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python scripts/sync_starbucks_menu.py
+      - run: python -m unittest discover -s tests -p 'test_menu_sync.py' -v
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: shop/package-lock.json
+      - run: npm ci && npm test && npm run build
+        working-directory: shop
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          branch: automation/us-menu-snapshot
+          commit-message: 'Refresh official US menu snapshot'
+          title: 'Refresh official US menu snapshot'
+          body: 'Refresh public Starbucks US menu options and base nutrition. Review availability and schema changes before merging. Modifier calorie values remain unknown unless separately verified.'
+          add-paths: shop/src/data/starbucks-us.json
