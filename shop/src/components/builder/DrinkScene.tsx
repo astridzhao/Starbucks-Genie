@@ -3,7 +3,7 @@ import { syrupPulses, PUMP_SECONDS } from './syrup-pulses';
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { createIce } from './ice';
 import { drinkAppearance } from './drink-appearance';
 import type { DrinkAppearance } from './drink-appearance';
 import type { DrinkBuild } from '../../data/nutrition';
@@ -134,21 +134,13 @@ class DrinkRenderer {
     const uniforms = {uCoffee:{value:new THREE.Color(recipe.coffeeColor)},uSettled:{value:new THREE.Color(recipe.settledColor)},uMilk:{value:new THREE.Color(recipe.milkColor)},uFoamColor:{value:new THREE.Color(recipe.foamColor)},uMilkAmount:{value:recipe.milkFraction},uMilkAge:{value:5},uMix:{value:0},uTime:{value:0},uHeight:{value:fluidH},uLatte:{value:recipe.milkDrink?1:0},uFoam:{value:recipe.foam}};
     this.liquid = new THREE.Mesh(new THREE.CylinderGeometry(topRadius,b-.025,fluidH,96,24),new THREE.ShaderMaterial({vertexShader:vertex,fragmentShader:fragment,uniforms})); this.liquid.position.y=.12+fluidH/2; this.cup.add(this.liquid);
     this.surface = new THREE.Mesh(new THREE.CircleGeometry(topRadius,96),new THREE.MeshPhysicalMaterial({color:recipe.coffeeColor,roughness:.3,metalness:0,clearcoat:.3,clearcoatRoughness:.14,envMapIntensity:.12}));this.surface.rotation.x=-Math.PI/2;this.surface.position.y=this.fill+.003;this.cup.add(this.surface);
+    // The drink is the backdrop for tinted submerged ice. Its opaque depth
+    // previously cut every cube off at the waterline, leaving only white caps.
+    this.liquid.material.depthWrite = !recipe.ice;
+    this.surface.material.depthWrite = !recipe.ice;
     const rand=random(122);
     if (recipe.ice) {
-      const iceMaterial=new THREE.MeshPhysicalMaterial({color:0xe5eeea,transparent:true,opacity:.38,depthWrite:true,roughness:.12,ior:1.31,clearcoat:.5,clearcoatRoughness:.1,envMapIntensity:.2});
-      for(let i=0;i<8;i++) {
-        const angle=i*2.399;
-        const width=(.28+rand()*.06)*cup.width, height=(.25+rand()*.07)*cup.width, depth=(.27+rand()*.06)*cup.width;
-        // A rotated cube fits inside its bounding sphere. Keep that entire sphere
-        // inside the liquid radius, including a margin for the tapered wall.
-        const halfDiagonal=Math.hypot(width,height,depth)/2;
-        const allowedRadius=Math.max(0,topRadius-halfDiagonal-.05);
-        const radius=i===0?0:allowedRadius*(.55+rand()*.35);
-        const geometry=new RoundedBoxGeometry(width,height,depth,3,.035*cup.width);
-
-        const cube=this.makeMesh(geometry,iceMaterial,this.ice);cube.position.set(Math.cos(angle)*radius,this.fill-.02+rand()*.045,Math.sin(angle)*radius);cube.rotation.set(rand()*.65,rand()*Math.PI,rand()*.5);cube.castShadow=true;cube.userData.home=cube.position.clone();cube.userData.rotation=cube.rotation.clone();
-      }
+      this.ice.add(...createIce(cup.width, topRadius, this.fill, recipe.settledColor));
     }
     const cream=new THREE.MeshStandardMaterial({color:recipe.foamColor,roughness:.83,bumpMap:this.foamTexture,bumpScale:.009});
     if(recipe.foam) {
@@ -170,7 +162,7 @@ class DrinkRenderer {
     if(!recipe.foam&&!recipe.whipped)cream.dispose();
     this.stream=this.makeMesh(new THREE.CylinderGeometry(.017,.022,1,10),new THREE.MeshPhysicalMaterial({color:recipe.milkColor,roughness:.2,clearcoat:1}),this.pour);this.stream.visible=false;
     this.ripple=this.makeMesh(new THREE.TorusGeometry(.085,.006,6,48),new THREE.MeshBasicMaterial({color:0xead4ab,transparent:true,opacity:.4}),this.pour);this.ripple.rotation.x=Math.PI/2;this.ripple.visible=false;
-    this.canvas.dataset.iceCount=recipe.ice?'8':'0';this.canvas.dataset.toppings=String(recipe.toppingCount);this.canvas.dataset.fruit=String(recipe.fruitCount);this.canvas.dataset.cupSize=Object.entries(recipe.cup).map(([k,v])=>`${k}:${v}`).join(',');
+    this.canvas.dataset.iceCount=String(this.ice.children.length);this.canvas.dataset.toppings=String(recipe.toppingCount);this.canvas.dataset.fruit=String(recipe.fruitCount);this.canvas.dataset.cupSize=Object.entries(recipe.cup).map(([k,v])=>`${k}:${v}`).join(',');
   }
   update(recipe: DrinkAppearance,mixToken:number,replay:number) {
     const old=this.recipe,now=this.clock;
