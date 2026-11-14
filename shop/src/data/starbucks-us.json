@@ -1,6 +1,6 @@
 {
   "region": "US",
-  "fetchedAt": "2026-11-11T21:54:09.530320+00:00",
+  "fetchedAt": "2026-11-14T16:39:22.164085+00:00",
   "source": "https://www.starbucks.com/apiproxy/v1/ordering/menu",
   "bases": [
     {
@@ -18666,6 +18666,6 @@
   "orderingSettings": {
     "maximumModifierAmount": 12,
     "source": "https://www.starbucks.com/menu",
-    "verifiedAt": "2026-11-11"
+    "verifiedAt": "2026-11-14"
   }
 }
